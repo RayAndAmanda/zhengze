@@ -7,13 +7,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include<thread>
+#include<mutex>
+#include<Windows.h>
+using namespace std;
 
-
-
-
+std::mutex mt;
 
 int test_regex_match()
 {
+	mt.lock();
 	std::string pattern{ "\\d{3}-\\d{8}|\\d{4}-\\d{7}" }; // fixed telephone
 	std::regex re(pattern);
 
@@ -29,7 +32,7 @@ int test_regex_match()
 		if (ret) fprintf(stderr, "%s, can match\n", tmp.c_str());
 		else fprintf(stderr, "%s, can not match\n", tmp.c_str());
 	}
-
+	mt.unlock();
 	return 0;
 }
 
@@ -114,8 +117,24 @@ int test_regex_replace2()
 
 	return 0;
 }
+void hello_thread()
+{
+	mt.lock();
+	cout << "thread1\n";
+	cout << "stilling\n";
+	Sleep(4000);
+	cout << "stiinnnnn222\n";
+	cout << "end thread\n";
+	mt.unlock();
+}
 int main()
 {
+	thread t1(hello_thread);
+	thread t2(test_regex_match);
+	t2.detach();
+	//t1.detach();
+	//t1.join();
+	cout << "mian thread here" ;
 	test_regex_match();
 	test_regex_search();
 	test_regex_search2();
@@ -125,3 +144,4 @@ int main()
 	std::cin >> a;
 	return 0;
 }
+
